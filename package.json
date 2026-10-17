@@ -1,11 +1,29 @@
 {
   "dependencies": {
-    "express": "*",
+    "express": "4.22.3",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "chai": "^4.5.0",
+    "jest": "^30.5.2",
     "mocha": "^10.2.0",
-    "socket.io": "*"
+    "socket.io-client": "^4.8.4"
+  },
+  "overrides": {
+    "proxy-addr": "2.0.8"
   },
   "scripts": {
     "start": "node server.js",
-    "test": "mocha"
+    "test": "mocha --ui bdd",
+    "test:integration": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/integration/**/*.test.js"
+    ]
   }
 }

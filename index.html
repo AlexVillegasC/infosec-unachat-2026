@@ -1,35 +1,215 @@
 <!doctype html>
-<html>
+<html lang="es">
   <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Chat Socket.IO UNA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px;}
-      form button { width: 10%; background: rgb(130, 224, 255);  border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-      #messages { margin-bottom: 40px }
-      #nombre, #m { display: inline-block;}
-      #m {width: 69%; margin-right: 4px;}
-      #nombre {width: 20%}
+      :root {
+        --paper: #f4efe4;
+        --paper-raised: #fffaf2;
+        --ink: #241c14;
+        --ink-soft: #5c4632;
+        --line: #e2d3bc;
+        --pine: #1d3530;
+        --pine-ink: #f6f0e4;
+        --clay: #b8431f;
+        --gold: #f0c14b;
+        --shadow: 0 10px 24px rgba(36, 28, 20, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body { height: 100%; }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(240, 193, 75, 0.18), transparent 28rem),
+          var(--paper);
+        font: 400 1rem/1.45 "Source Sans 3", "Segoe UI", sans-serif;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        min-height: 100%;
+        caret-color: var(--clay);
+      }
+
+      ::selection {
+        background: #f0c14b;
+        color: var(--ink);
+      }
+
+      header {
+        padding: 1.5rem 1.5rem 0.75rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Source Serif 4", Georgia, serif;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+      }
+
+      header p {
+        margin: 0.7rem 0 0;
+        max-width: 42rem;
+        color: var(--ink-soft);
+      }
+
+      main {
+        overflow: auto;
+        padding: 0.5rem 1.5rem 1rem;
+        scrollbar-color: var(--clay) transparent;
+      }
+
+      #empty-state {
+        margin: 2.5rem 0 0;
+        max-width: 28rem;
+        color: var(--ink-soft);
+      }
+
+      #empty-state strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--ink);
+        font-size: 1.15rem;
+      }
+
+      #messages {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.55rem;
+      }
+
+      #messages li {
+        max-width: 46rem;
+        padding: 0.7rem 0.9rem;
+        background: var(--paper-raised);
+        border-radius: 0.4rem 1rem 1rem 0.4rem;
+        box-shadow: var(--shadow);
+        animation: arrive 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      #messages li:nth-child(even) {
+        background: #f7ecda;
+      }
+
+      #messages img,
+      #messages iframe {
+        display: block;
+        width: min(100%, 28rem);
+        max-height: 16rem;
+        margin-top: 0.55rem;
+        border: 0;
+        border-radius: 0.4rem;
+        background: var(--paper);
+      }
+
+      #messages iframe {
+        height: auto;
+        aspect-ratio: 16 / 9;
+      }
+
+      form {
+        display: grid;
+        grid-template-columns: minmax(9rem, 13rem) minmax(0, 1fr) auto;
+        gap: 0.65rem 0.75rem;
+        align-items: end;
+        padding: 0.9rem 1.5rem 1.1rem;
+        background: var(--pine);
+        color: var(--pine-ink);
+        box-shadow: 0 -8px 20px rgba(29, 53, 48, 0.16);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: #d9c7a4;
+      }
+
+      input {
+        width: 100%;
+        border: 0;
+        border-radius: 0.35rem;
+        padding: 0.7rem 0.75rem;
+        background: var(--paper-raised);
+        color: var(--ink);
+        font: inherit;
+      }
+
+      button {
+        height: 2.7rem;
+        padding: 0 1.15rem;
+        border: 0;
+        border-radius: 0.35rem;
+        background: var(--gold);
+        color: var(--ink);
+        font: 600 1rem/1 "Source Sans 3", sans-serif;
+        cursor: pointer;
+      }
+
+      button:hover { background: #ffd56a; }
+
+      :focus-visible {
+        outline: 3px solid var(--clay);
+        outline-offset: 2px;
+      }
+
+      @keyframes arrive {
+        from { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+        to { opacity: 1; transform: none; filter: none; }
+      }
+
+      @media (max-width: 720px) {
+        header, main, form { padding-left: 1rem; padding-right: 1rem; }
+
+        form {
+          grid-template-columns: 1fr auto;
+        }
+
+        .field-name {
+          grid-column: 1 / -1;
+        }
+      }
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
+    <header>
+      <h1>Chat Socket.IO UNA</h1>
+      <p>Messages are shared live with everyone in this room.</p>
+    </header>
+    <main id="transcript">
+      <p id="empty-state"><strong>The room is empty.</strong> Send the first message.</p>
+      <ul id="messages"></ul>
+    </main>
     <form action="">
-      <input id="nombre" autocomplete="off" placeholder="Username"/>
-      <input id="m" autocomplete="off" placeholder="Escriba un mensaje" /><button>Send</button>
+      <div class="field field-name">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" autocomplete="off" placeholder="Username"/>
+      </div>
+      <div class="field">
+        <label for="m">Mensaje</label>
+        <input id="m" autocomplete="off" placeholder="Escriba un mensaje" />
+      </div>
+      <button type="submit">Send</button>
     </form>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.8.4/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
 
     var colorHexTxt = "";
 
-    // genera colores aleatorios en hexadeximal
     function getRandomColor() {
         var letters = '0123456789ABCDEF';
         var color = '#';
@@ -43,8 +223,6 @@
       $(function () {
         var socket = io();
 
-        // emite evento al servidor
-        
         $('form').submit(function(){
             var nombreTxt = $('#nombre').val() || "Anomimo";
             var mensajeTxt = $('#m').val();
@@ -59,13 +237,13 @@
             return false;
         });
 
-        // ... (resto del código) ...
-
         socket.on('Evento-Mensaje-Server', function(msg){
             var msgJson = JSON.parse(msg);
             var mensajeDisplay = "<b style='color:"+ msgJson.color +"'>" + msgJson.nombre + "</b>: " + msgJson.mensaje;
+            $('#empty-state').attr('hidden', true);
             $('#messages').append($('<li>').html(mensajeDisplay));
-            window.scrollTo(0, document.body.scrollHeight);
+            var transcript = document.getElementById('transcript');
+            transcript.scrollTop = transcript.scrollHeight;
         });
 
       });
