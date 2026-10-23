@@ -15,6 +15,9 @@ jobs:
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          curl --fail --silent --show-error --output /dev/null \
-            --get --data-urlencode "ref=${GITHUB_SHA}" \
+          # Do not send ref=$GITHUB_SHA. Render answers 404 when that
+          # commit is not in the service's linked repository, and a
+          # pinned ref also disables automatic deploys.
+          curl --fail --silent --show-error \
+            --request POST \
             "$RENDER_DEPLOY_HOOK_URL"
